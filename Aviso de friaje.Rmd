@@ -1,0 +1,179 @@
+---
+title: "Aviso de friaje - (SENAMHI)"
+author: "Gorky Florez Castillo"
+date: "4/8/2021"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: cerulean
+---
+```{r}
+require(pacman)
+pacman::p_load(png,broom,tidyverse,leaflet, leaflet.extras, leaflet.providers,leafem,htmlwidgets, sp,
+               sf,readxl,mapview,RColorBrewer,viridis,Rgb,ggplot2,raster,rmarkdown,flexdashboard,
+               crosstalk, DT,dplyr,htmltools,rgdal, broom,leafem,mapview, Rgb, raster,rmarkdown, 
+               mapedit, tibble, cptcity)
+
+data_28          <- st_read ("SHP/Friaje_MDD/view_aviso.shp")
+data_29          <- st_read ("SHP/Friaje_MDD/view_aviso(1).shp")
+data_30          <- st_read ("SHP/Friaje_MDD/view_aviso(2).shp")
+Friaje_28        <- subset(data_28, nivel  == "Nivel 2")
+Friaje_29_Ama    <- subset(data_29, nivel  == "Nivel 2")
+Friaje_29_Naj    <- subset(data_29, nivel  == "Nivel 3")
+Friaje_30_Ama    <- subset(data_30, nivel  == "Nivel 2")
+Friaje_30_Naj    <- subset(data_30, nivel  == "Nivel 3")
+Friaje_30_Roj    <- subset(data_30, nivel  == "Nivel 4")
+Peru_depa        <- getData('GADM', country='Peru', level=1) %>%st_as_sf()  
+Peru_pro         <- getData('GADM', country='Peru', level=2) %>%st_as_sf()  
+Peru_dis         <- getData('GADM', country='Peru', level=3) %>%st_as_sf() 
+#Definiendo el Logo
+m="https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png"
+Sena = "https://github.com/GorkyFlorez/Logo_identidades/blob/main/senamhi.png"
+
+```
+
+DÉCIMO TERCER FRIAJE EN LA SELVA en RStudio
+===================================== 
+
+Column {data-width=550}
+-----------------------------------------------------------------------
+
+### Mapa Aviso Meteorológico Julio 28 
+
+```{r map}
+leaflet() %>%
+  addControl(html = "<p><strong><em>DÉCIMO TERCER FRIAJE EN LA SELVA (SENAMHI)</em></strong></p>",
+             position = "topright")%>%
+  addLogo(m,url = "https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png",
+          position = "topleft",
+          offset.x = 50,
+          offset.y = 10,
+          width = 100,
+          height = 100)%>%
+  addPolygons(data= Peru_depa,
+              color = "#444444",
+              fillOpacity = 0.001,
+              group = "Peru_depa")%>%
+  addScaleBar(position = "bottomright",options = scaleBarOptions(maxWidth = 100,
+                                                                 metric = TRUE,
+                                                                 imperial = TRUE,
+                                                                 updateWhenIdle = TRUE))%>%
+  addLegend(position = "bottomleft", colors="gold", labels = "Friaje CUSCO, MADRE DE DIOS, PUNO", opacity = 1)%>%
+  addLayersControl(baseGroups = c("OSM","Satellite"),
+                   overlayGroups = c("Peru_depa","Friaje_28_Naj"),
+                   position = "topright",
+                   options = layersControlOptions(collapsed = T))%>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM")%>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Satellite")%>%
+  addPolygons(data= Friaje_28  ,
+            color = "gold",
+            weight = 2,
+            fillOpacity = 0.8,
+            fillColor = "gold",
+            group = "Friaje_28")%>%
+  addMiniMap(tiles = providers$Esri.WorldImagery,toggleDisplay = TRUE)
+
+```
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+### Mapa Aviso Meteorológico Julio 29
+
+```{r map 1}
+leaflet() %>%
+  addControl(html = "<p><strong><em>DÉCIMO TERCER FRIAJE EN LA SELVA (SENAMHI)</em></strong></p>",
+             position = "topright")%>%
+  addLogo(m,url = "https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png",
+          position = "topleft",
+          offset.x = 50,
+          offset.y = 10,
+          width = 100,
+          height = 100)%>%
+  addPolygons(data= Peru_depa,
+              color = "#444444",
+              fillOpacity = 0.001,
+              group = "Peru_depa")%>%
+  addPolygons(data= Friaje_29_Ama  ,
+              color = "gold",
+              weight = 2,
+              fillOpacity = 0.8,
+              fillColor = "gold",
+              group = "Friaje_29_Am")%>%
+  addPolygons(data= Friaje_29_Naj  ,
+              color = "Orange",
+              weight = 2,
+              fillOpacity = 0.8,
+              fillColor = "Orange",
+              group = "Friaje_29_Naj")%>%
+  addScaleBar(position = "bottomright",options = scaleBarOptions(maxWidth = 100,
+                                                                 metric = TRUE,
+                                                                 imperial = TRUE,
+                                                                 updateWhenIdle = TRUE))%>%
+  addLegend(position = "bottomleft", colors="Orange", labels = "Friaje CUSCO, HUANUCO, JUNIN, LORETO, MADRE DE DIOS, PASCO, PUNO, SAN MARTIN, UCAYALI", opacity = 1)%>%
+  addLayersControl(baseGroups = c("OSM","Satellite"),
+                   overlayGroups = c("Peru_depa","Friaje_29_Naj", "Friaje_29_Am"),
+                   position = "topright",
+                   options = layersControlOptions(collapsed = T))%>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM")%>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Satellite")%>%
+  addMiniMap(tiles = providers$Esri.WorldImagery,toggleDisplay = TRUE)
+```
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+### Mapa Aviso Meteorológico Julio 30 
+
+```{r map 2}
+leaflet() %>%
+  addControl(html = "<p><strong><em>DÉCIMO TERCER FRIAJE EN LA SELVA (SENAMHI)</em></strong></p>",
+             position = "topright")%>%
+  addLogo(m,url = "https://images.vexels.com/media/users/3/143561/isolated/preview/afa3aa927b63061e3b0222b7dab9cdbf-ubicaci--n-n--utica-norte-flecha-vintage-by-vexels.png",
+          position = "topleft",
+          offset.x = 50,
+          offset.y = 10,
+          width = 100,
+          height = 100)%>%
+  addPolygons(data= Peru_depa,
+              color = "#444444",
+              fillOpacity = 0.001,
+              group = "Peru_depa")%>%
+  addPolygons(data= Friaje_30_Ama  ,
+              color = "gold",
+              weight = 2,
+              fillOpacity = 0.8,
+              fillColor = "gold",
+              group = "Friaje_30_Ama")%>%
+  addPolygons(data= Friaje_30_Naj  ,
+              color = "Orange",
+              weight = 2,
+              fillOpacity = 0.8,
+              fillColor = "Orange",
+              group = "Friaje_30_Naj")%>%
+  addPolygons(data= Friaje_30_Roj  ,
+              color = "red",
+              weight = 2,
+              fillOpacity = 0.8,
+              fillColor = "red",
+              group = "Friaje_30_red")%>%
+  addScaleBar(position = "bottomright",options = scaleBarOptions(maxWidth = 100,
+                                                                 metric = TRUE,
+                                                                 imperial = TRUE,
+                                                                 updateWhenIdle = TRUE))%>%
+  addLegend(position = "bottomleft", colors="red", labels = "Friaje CUSCO, HUANUCO, JUNIN, LORETO, MADRE DE DIOS, PASCO, PUNO, SAN MARTIN, UCAYALI", opacity = 1)%>%
+  addLayersControl(baseGroups = c("OSM","Satellite"),
+                   overlayGroups = c("Peru_depa","Friaje_30_Ama", "Friaje_30_Naj", "Friaje_30_red"),
+                   position = "topright",
+                   options = layersControlOptions(collapsed = T))%>%
+  addProviderTiles(providers$OpenStreetMap, group = "OSM")%>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "Satellite")%>%
+  addMiniMap(tiles = providers$Esri.WorldImagery,toggleDisplay = TRUE)
+```
+
+
+
+
+
+
+
+
